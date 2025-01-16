@@ -1,7 +1,7 @@
 package crawler
 
 import (
-	"SecureJS/internal/utils" // 你自己项目里的包路径，如有不同需改
+	"SecureJS/internal/utils"
 	"fmt"
 	"log"
 	"strings"
@@ -12,8 +12,6 @@ import (
 	"github.com/go-rod/rod/lib/launcher"
 	"github.com/go-rod/rod/lib/proto"
 
-	// 确保版本更新到包含 `Inject` 的版本
-	//"github.com/go-rod/stealth"
 )
 
 type CrawlResult struct {
@@ -25,7 +23,7 @@ type CrawlResult struct {
 // -----------------------------------------------------------
 // 并发爬取多个链接
 // -----------------------------------------------------------
-func crawlAll(urls []string, concurrency int) ([]*CrawlResult, error) {
+func crawlAll(urls []string, concurrency int, browserPath string) ([]*CrawlResult, error) {
 	if len(urls) == 0 {
 		return nil, fmt.Errorf("no URLs provided")
 	}
@@ -33,7 +31,13 @@ func crawlAll(urls []string, concurrency int) ([]*CrawlResult, error) {
 		concurrency = 1
 	}
 
-	chromePath := launcher.NewBrowser().MustGet()
+	var chromePath string
+	if browserPath != "" {
+		chromePath = browserPath
+	} else {
+		chromePath = launcher.NewBrowser().MustGet()
+	}
+
 	u := launcher.New().
 		Bin(chromePath).
 		Headless(true). // 调试时可设置为 false
@@ -181,8 +185,8 @@ func tryFetchOneURL(browser *rod.Browser, url string, timeout time.Duration) (*C
 // -----------------------------------------------------------
 // 对外的接口，用于收集
 // -----------------------------------------------------------
-func CollectLinks(urls []string, threads int, uniqueLinks map[string]struct{}, toParse *[]string) error {
-	results, err := crawlAll(urls, threads)
+func CollectLinks(urls []string, threads int, uniqueLinks map[string]struct{}, toParse *[]string, browserPath string) error {
+	results, err := crawlAll(urls, threads, browserPath)
 	if err != nil {
 		return fmt.Errorf("failed to crawl: %v", err)
 	}

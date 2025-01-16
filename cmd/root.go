@@ -21,14 +21,16 @@ var (
 	threads    int
 	configPath string
 	outputFile string
+	browserPath string
 )
 
 func init() {
 	rootCmd.Flags().StringVarP(&singleURL, "url", "u", "", "Single target URL to scan (e.g. https://example.com)")
 	rootCmd.Flags().StringVarP(&listFile, "list", "l", "", "File containing target URLs (one per line)")
 	rootCmd.Flags().IntVarP(&threads, "threads", "t", 20, "Number of concurrent threads for scanning")
-	rootCmd.Flags().StringVar(&configPath, "config", "config/config.yaml", "Path to config file (e.g. config.yaml)")
+	rootCmd.Flags().StringVarP(&configPath, "config", "c", "config/config.yaml", "Path to config file (e.g. config.yaml)")
 	rootCmd.Flags().StringVarP(&outputFile, "output", "o", "", "Output file (supports .txt, .csv, .json)")
+	rootCmd.Flags().StringVarP(&browserPath, "browser", "b", "", "Path to Chrome/Chromium executable (optional). If not set, will use Rod's default.")
 }
 
 var rootCmd = &cobra.Command{
@@ -57,7 +59,7 @@ var rootCmd = &cobra.Command{
 		var toParse []string // 所有捕获的链接放入 toParse
 
 		// 	2.1 收集加载某个目标 url 后（使用无头浏览器），默认加载的所有其他链接（js等）并放入 toParse
-		err := crawler.CollectLinks(urls, threads, uniqueLinks, &toParse)
+		err := crawler.CollectLinks(urls, threads, uniqueLinks, &toParse, browserPath)
 		if err != nil {
 			log.Fatalf("[!] Error collecting links: %v", err)
 		}
