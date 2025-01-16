@@ -1,0 +1,12 @@
+rules:
+  - name: Sensitive Field
+    f_regex: (?i)\[?["']?[0-9A-Za-z_-]{0,15}(?:key|secret|token|config|auth|access|admin|ticket)[0-9A-Za-z_-]{0,15}["']?\]?\s*(?:=|:|\)\.val\()\s*\[?\{?["']([^"']{8,256})["']?(?::|,)?
+
+  - name: Password Field
+    f_regex: ((|\\)(|'|")(|[\w]{1,10})([p](ass|wd|asswd|assword))(|[\w]{1,10})(|\\)(|'|")(:|=|\)\.val\()(|)(|\\)('|")([^'"]+?)(|\\)('|")(|,|\)))
+
+  - name: JSON Web Token
+    f_regex: (eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9._-]{10,}|eyJ[A-Za-z0-9_\/+-]{10,}\.[A-Za-z0-9._\/+-]{10,})
+
+  - name: Cloud Key
+    f_regex: (?i)(?:AWSAccessKeyId=[A-Z0-9]{16,32}|access[-_]?key[-_]?(?:id|secret)|LTAI[a-z0-9]{12,20})
