@@ -70,9 +70,9 @@ var rootCmd = &cobra.Command{
 			log.Fatalf("[!] Error collecting links from body: %v", err)
 		}
 
-		for _, jsurl := range toParse {
-			fmt.Println(jsurl)
-		}
+		// for _, jsurl := range toParse {
+		// 	fmt.Println(jsurl)
+		// }
 
 		// 3) 对所有收集到的链接进行二次请求
 		parseResults, err := parser.ParseAll(toParse, threads)
