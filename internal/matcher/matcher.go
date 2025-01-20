@@ -92,21 +92,21 @@ func MatchAll(rules []config.Rule, parseResults []*parser.ParseResult) ([]*Match
 		}
 	}
 	// 输出匹配结果
-	var lastURL string
-	for _, result := range results {
-		for _, item := range result.Items {
-			if item.MatchedText != "" {
-				if lastURL != result.URL {
-					if lastURL != "" {
-						fmt.Println() // 为了分隔不同的URL输出
-					}
-					fmt.Printf("URL: %s\n", result.URL)
-					lastURL = result.URL
-				}
-				fmt.Printf("  Rule: %s, Matched: %s\n", item.RuleName, item.MatchedText)
-			}
-		}
-	}
+	// var lastURL string
+	// for _, result := range results {
+	// 	for _, item := range result.Items {
+	// 		if item.MatchedText != "" {
+	// 			if lastURL != result.URL {
+	// 				if lastURL != "" {
+	// 					fmt.Println() // 为了分隔不同的URL输出
+	// 				}
+	// 				fmt.Printf("URL: %s\n", result.URL)
+	// 				lastURL = result.URL
+	// 			}
+	// 			fmt.Printf("  Rule: %s, Matched: %s\n", item.RuleName, item.MatchedText)
+	// 		}
+	// 	}
+	// }
 	return results, nil
 }
 
