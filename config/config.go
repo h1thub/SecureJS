@@ -39,7 +39,7 @@ func LoadConfig(path string) (*Config, error) {
 			defaultContent := `
 rules:
   - name: Sensitive Field
-    f_regex: (?i)\[?["']?[0-9A-Za-z_-]{0,15}(?:key|secret|token|config|auth|access|admin|ticket)[0-9A-Za-z_-]{0,15}["']?\]?\s*(?:=|:|\)\.val\()\s*\[?\{?["']([^"']{8,256})["']?(?::|,)?
+    f_regex: (?i)(\[?["']?[\w-]{0,10}(?:key|secret|token|config|auth|access|admin|ticket)[\w-]{0,10}["']?\]?)\s*(?:=|:|\)\.val\()\s*\[?\{?(?:'([^']{8,100})'|"([^"]{8,100})")(?:[:;,\}\]]?)?
 
   - name: Password Field
     f_regex: ((|\\)(|'|")(|[\w]{1,10})([p](ass|wd|asswd|assword))(|[\w]{1,10})(|\\)(|'|")(:|=|\)\.val\()(|)(|\\)('|")([^'"]+?)(|\\)('|")(|,|\)))

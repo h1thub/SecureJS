@@ -1,62 +1,32 @@
 # SecureJS
 
-SecureJS is a powerful tool designed to collect all related links from a target website, perform requests on these links (primarily JavaScript files), and scan for sensitive information such as tokens, keys, passwords, AKSKs, and more.
+SecureJS 是一个强大的工具，旨在从目标网站收集所有相关链接，对这些链接（主要是 JavaScript 文件）执行请求，并扫描敏感信息，如令牌、密钥、密码、AKSK 等。
 
-## Table of Contents
+## 目录
 
 - [SecureJS](#securejs)
-  - [Table of Contents](#table-of-contents)
-  - [Features](#features)
-  - [Installation](#installation)
-    - [Prerequisites](#prerequisites)
-    - [Steps](#steps)
-  - [Usage](#usage)
-    - [Example](#example)
-  - [Configuration](#configuration)
-    - [Sample `config.yaml`](#sample-configyaml)
-    - [Loading Configuration](#loading-configuration)
-  - [Project Structure](#project-structure)
+  - [目录](#目录)
+  - [功能](#功能)
+  - [使用方法](#使用方法)
+    - [示例](#示例)
+  - [配置](#配置)
+    - [示例 `config.yaml`](#示例-configyaml)
+    - [加载配置](#加载配置)
+  - [项目结构](#项目结构)
 
-## Features
+## 功能
 
-- **Comprehensive Crawling**: Simulates browser visits to collect all links and JavaScript files from the target.
-- **Secondary Requests**: Performs additional requests on collected resources for deeper analysis.
-- **Customizable Matching Rules**: Supports custom rules defined in `config.yaml` to identify sensitive information.
-- **Flexible Output Formats**: Outputs results in CSV, JSON, or plain text formats.
-- **Easy Configuration**: Simplifies setup and customization through a configuration file.
+- **全面爬取**：模拟浏览器访问，收集目标网站的所有链接和 JavaScript 文件。
+- **二次请求**：对收集的资源执行额外的请求以进行更深入的分析。
+- **可自定义的匹配规则**：支持在 `config.yaml` 中定义的自定义规则，以识别敏感信息。
+- **灵活的输出格式**：将结果输出为 CSV、JSON 或纯文本格式。
+- **简易配置**：通过配置文件简化设置和自定义过程。
 
-## Installation
+## 使用方法
 
-### Prerequisites
+SecureJS 可以通过命令行执行，并提供各种选项以自定义其行为。
 
-- [Go](https://golang.org/dl/) 1.16 or later
-
-### Steps
-
-1. **Clone the Repository**
-
-   ```bash
-   git clone
-   cd SecureJS
-   ```
-
-2. **Build the Application**
-
-   ```bash
-   go build
-   ```
-
-3. **Verify Installation**
-
-   ```bash
-   ./SecureJS -h
-   ```
-
-## Usage
-
-SecureJS can be executed via the command line with various options to customize its behavior.
-
-### Example
+### 示例
 
 ```bash
 ./SecureJS -u https://example.com -o results.csv
@@ -64,16 +34,17 @@ SecureJS can be executed via the command line with various options to customize 
 ```bash
 ./SecureJS -l targets.txt -o results.csv -t 30
 ```
-## Configuration
 
-SecureJS uses a `config.yaml` file to define custom matching rules and other project-level configurations.
+## 配置
 
-### Sample `config.yaml`
+SecureJS 使用 `config.yaml` 文件来定义自定义匹配规则和其他项目级配置。
+
+### 示例 `config.yaml`
 
 ```yaml
 rules:
   - name: Sensitive Field
-    f_regex: (?i)\[?["']?[0-9A-Za-z_-]{0,15}(?:key|secret|token|config|auth|access|admin|ticket)[0-9A-Za-z_-]{0,15}["']?\]?\s*(?:=|:|\)\.val\()\s*\[?\{?["']([^"']{8,256})["']?(?::|,)?
+    f_regex: (?i)\[?["']?[0-9A-Za-z_-]{0,15}(?:key|secret|token|config|auth|access|admin|ticket)[0-9A-Za-z_-]{0,15}["']?\]?\s*(?:=|:|\)\.val\()\s*\[?\{?["']([^"']{8,100})["']?(?::|,)?
 
   - name: Password Field
     f_regex: ((|\\)(|'|")(|[\w]{1,10})([p](ass|wd|asswd|assword))(|[\w]{1,10})(|\\)(|'|")(:|=|\)\.val\()(|)(|\\)('|")([^'"]+?)(|\\)('|")(|,|\)))
@@ -85,36 +56,36 @@ rules:
     f_regex: (?i)(?:AWSAccessKeyId=[A-Z0-9]{16,32}|access[-_]?key[-_]?(?:id|secret)|LTAI[a-z0-9]{12,20})
 ```
 
-### Loading Configuration
+### 加载配置
 
-The configuration is automatically loaded from the `config/config.yaml` file. Ensure that your custom rules are correctly defined to match the sensitive information you aim to identify.
+配置会自动从 `config/config.yaml` 文件中加载。请确保您的自定义规则已正确定义，以匹配您希望识别的敏感信息。
 
-## Project Structure
+## 项目结构
 
 ```
 SecureJS/
 ├── cmd/
-│   └── root.go             # Entry point for command-line arguments handling (-u, -l, -t, etc.)
+│   └── root.go             # 处理命令行参数（-u、-l、-t 等）的入口点
 │
 ├── internal/
 │   ├── crawler/
-│   │   ├── crawler.go      # Crawler logic, simulates browser access, collects all links and JS files
-│   │   └── linkfind.go     # Extracts all links and JS from the response body of the target page
+│   │   ├── crawler.go      # 爬虫逻辑，模拟浏览器访问，收集所有链接和 JS 文件
+│   │   └── linkfind.go     # 从目标页面的响应体中提取所有链接和 JS
 │   │
 │   ├── parser/
-│   │   └── parser.go       # Performs secondary requests on all collected links and JS files
+│   │   └── parser.go       # 对所有收集的链接和 JS 文件执行二次请求
 │   │
 │   ├── matcher/
-│   │   └── matcher.go      # Reads and parses custom rules from config.yaml and matches against response bodies
+│   │   └── matcher.go      # 从 config.yaml 中读取并解析自定义规则，并与响应体匹配
 │   │
 │   └── output/
-│       └── output.go       # Outputs results to files in CSV, JSON, or text formats
+│       └── output.go       # 将结果输出为 CSV、JSON 或文本格式的文件
 │
 ├── config/
-│   ├── config.go           # Handles loading and parsing of the configuration file (config.yaml)
-│   └── config.yaml         # Custom rules and other project-level configurations
+│   ├── config.go           # 处理配置文件（config.yaml）的加载和解析
+│   └── config.yaml         # 自定义规则和其他项目级配置
 │
-├── go.mod                  # Go Modules management file
-├── go.sum                  # Go Modules checksum file
-└── main.go                 # Main program entry point, initializes and starts the application
+├── go.mod                  # Go Modules 管理文件
+├── go.sum                  # Go Modules 校验文件
+└── main.go                 # 主程序入口点，初始化并启动应用程序
 ```

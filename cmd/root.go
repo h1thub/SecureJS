@@ -95,7 +95,7 @@ var rootCmd = &cobra.Command{
 		// 6) 输出
 		if outputFile == "" {
 			// 未指定 -o，直接打印到控制台（这里包含“无信息”的提示）
-			output.PrintResultsToConsole(matchResults)
+			//output.PrintResultsToConsole(matchResults)
 		} else {
 			// 指定文件，就写文件（只写有敏感信息的条目）
 			err := output.WriteResultsToFile(matchResults, outputFile)
