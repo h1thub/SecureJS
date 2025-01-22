@@ -23,7 +23,7 @@ type CrawlResult struct {
 // -----------------------------------------------------------
 // 并发爬取多个链接
 // -----------------------------------------------------------
-func crawlAll(urls []string, concurrency int, browserPath string) ([]*CrawlResult, error) {
+func crawlAll(urls []string, concurrency int, browserPath string, customHeaders []string, proxy string) ([]*CrawlResult, error) {
 	if len(urls) == 0 {
 		return nil, fmt.Errorf("no URLs provided")
 	}
@@ -38,13 +38,18 @@ func crawlAll(urls []string, concurrency int, browserPath string) ([]*CrawlResul
 		chromePath = launcher.NewBrowser().MustGet()
 	}
 
-	u := launcher.New().
-		Bin(chromePath).
-		Headless(true). // 调试时可设置为 false
-		Set("ignore-certificate-errors").
-		Set("disable-blink-features", "AutomationControlled").
-		Set("disable-infobars").
-		MustLaunch()
+	launch := launcher.New().
+	Bin(chromePath).
+	Headless(true).
+	Set("ignore-certificate-errors").
+	Set("disable-blink-features", "AutomationControlled").
+	Set("disable-infobars")
+
+	if proxy != "" {
+		launch = launch.Proxy(proxy)
+	}
+
+	u := launch.MustLaunch()
 
 	browser := rod.New().ControlURL(u).MustConnect()
 	defer func() {
@@ -66,7 +71,7 @@ func crawlAll(urls []string, concurrency int, browserPath string) ([]*CrawlResul
 
 			// 最大重试次数，可自行调整
 			const maxRetry = 3
-			res, err := fetchOneURLWithRetry(browser, url, maxRetry)
+			res, err := fetchOneURLWithRetry(browser, url, maxRetry, customHeaders)
 			if err != nil {
 				resultChan <- &CrawlResult{URL: url, Error: err}
 				return
@@ -89,14 +94,14 @@ func crawlAll(urls []string, concurrency int, browserPath string) ([]*CrawlResul
 // -----------------------------------------------------------
 // 带重试的抓取逻辑
 // -----------------------------------------------------------
-func fetchOneURLWithRetry(browser *rod.Browser, url string, maxAttempts int) (*CrawlResult, error) {
+func fetchOneURLWithRetry(browser *rod.Browser, url string, maxAttempts int, customHeaders []string) (*CrawlResult, error) {
 	var lastErr error
 	baseTime := 20 * time.Second
 
 	for attempt := 1; attempt <= maxAttempts; attempt++ {
 		currentTimeout := time.Duration(attempt) * baseTime
 
-		result, err := tryFetchOneURL(browser, url, currentTimeout)
+		result, err := tryFetchOneURL(browser, url, currentTimeout, customHeaders)
 		if err == nil {
 			return result, nil
 		}
@@ -116,7 +121,7 @@ func fetchOneURLWithRetry(browser *rod.Browser, url string, maxAttempts int) (*C
 // -----------------------------------------------------------
 // 单次访问逻辑：在已有 page 上使用 stealth.Inject(page)
 // -----------------------------------------------------------
-func tryFetchOneURL(browser *rod.Browser, url string, timeout time.Duration) (*CrawlResult, error) {
+func tryFetchOneURL(browser *rod.Browser, url string, timeout time.Duration, customHeaders []string) (*CrawlResult, error) {
 	page := browser.MustPage("")
 	defer page.Close()
 
@@ -133,6 +138,27 @@ func tryFetchOneURL(browser *rod.Browser, url string, timeout time.Duration) (*C
 	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to set user agent: %w", err)
+	}
+
+	// 设置自定义请求头
+	if len(customHeaders) > 0 {
+		// 1) 准备一个 []string 来存储 "Key", "Value" 这种键值对
+		var headerPairs []string
+	
+		// 2) 遍历 -H 参数里传来的 "Key: Value" 格式字符串
+		for _, h := range customHeaders {
+			parts := strings.SplitN(h, ":", 2)
+			if len(parts) == 2 {
+				key := strings.TrimSpace(parts[0])
+				val := strings.TrimSpace(parts[1])
+				// 3) 依次将键和值 append 到同一个切片中
+				headerPairs = append(headerPairs, key, val)
+			}
+		}
+	
+		// 4) 调用 page.SetExtraHeaders(...)
+		//    注意要用变长参数传进去，所以是 headerPairs...
+		page.SetExtraHeaders(headerPairs)
 	}
 
 	// 设置超时
@@ -185,8 +211,8 @@ func tryFetchOneURL(browser *rod.Browser, url string, timeout time.Duration) (*C
 // -----------------------------------------------------------
 // 对外的接口，用于收集
 // -----------------------------------------------------------
-func CollectLinks(urls []string, threads int, uniqueLinks map[string]struct{}, toParse *[]string, browserPath string) error {
-	results, err := crawlAll(urls, threads, browserPath)
+func CollectLinks(urls []string, threads int, uniqueLinks map[string]struct{}, toParse *[]string, browserPath string, customHeaders []string, proxy string) error {
+	results, err := crawlAll(urls, threads, browserPath, customHeaders, proxy)
 	if err != nil {
 		return fmt.Errorf("failed to crawl: %v", err)
 	}

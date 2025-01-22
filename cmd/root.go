@@ -22,6 +22,8 @@ var (
 	configPath string
 	outputFile string
 	browserPath string
+	customHeaders []string
+	proxy string
 )
 
 func init() {
@@ -31,6 +33,8 @@ func init() {
 	rootCmd.Flags().StringVarP(&configPath, "config", "c", "config/config.yaml", "Path to config file (e.g. config.yaml)")
 	rootCmd.Flags().StringVarP(&outputFile, "output", "o", "", "Output file (supports .txt, .csv, .json)")
 	rootCmd.Flags().StringVarP(&browserPath, "browser", "b", "", "Path to Chrome/Chromium executable (optional). If not set, will use Rod's default.")
+	rootCmd.Flags().StringArrayVarP(&customHeaders, "header", "H", nil, "Add custom request headers. (e.g. -H 'Key: Value')")
+	rootCmd.Flags().StringVarP(&proxy, "proxy", "p", "", "Proxy to use (e.g. http://127.0.0.1:8080)")
 }
 
 var rootCmd = &cobra.Command{
@@ -59,13 +63,13 @@ var rootCmd = &cobra.Command{
 		var toParse []string // 所有捕获的链接放入 toParse
 
 		// 	2.1 收集加载某个目标 url 后（使用无头浏览器），默认加载的所有其他链接（js等）并放入 toParse
-		err := crawler.CollectLinks(urls, threads, uniqueLinks, &toParse, browserPath)
+		err := crawler.CollectLinks(urls, threads, uniqueLinks, &toParse, browserPath, customHeaders, proxy)
 		if err != nil {
 			log.Fatalf("[!] Error collecting links: %v", err)
 		}
 
 		// 	2.2 收集加载某个目标 url 后其 body 中的链接（js等）并放入 toParse
-		err = crawler.CollectLinksFromBody(urls, threads, uniqueLinks, &toParse)
+		err = crawler.CollectLinksFromBody(urls, threads, uniqueLinks, &toParse, customHeaders, proxy)
 		if err != nil {
 			log.Fatalf("[!] Error collecting links from body: %v", err)
 		}
@@ -75,7 +79,7 @@ var rootCmd = &cobra.Command{
 		// }
 
 		// 3) 对所有收集到的链接进行二次请求
-		parseResults, err := parser.ParseAll(toParse, threads)
+		parseResults, err := parser.ParseAll(toParse, threads, customHeaders, proxy)
 		if err != nil {
 			log.Fatalf("[!] Failed to parseAll: %v\n", err)
 		}

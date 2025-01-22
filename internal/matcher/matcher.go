@@ -125,7 +125,7 @@ func filterMatchedItems(matchedItems []MatchItem) []MatchItem {
         "client", "from", "json", "script", "line", "late", "cate", "ance", "more", "nore", "valid", "dent", "source",
 		"select", "value", "color", "image", "style", "compon", ".com", "date", "file", "txt", "answer", "survey",
 		"false", "number", "_id", "connect", "body", "message", "session", "register", "work", "word", "world", "feedback",
-		"con", "success", "ream", "rity", "rest", "loca", "admin", "home", "tion", 
+		"con", "success", "ream", "rity", "rest", "loca", "admin", "home", "tion", "enter", "button", "fetch", "list",
     }
 
     // 2) 前置过滤关键词（只要 key 包含这些，就过滤）

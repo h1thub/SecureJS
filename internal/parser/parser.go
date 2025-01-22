@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"net/url"
 	"strings"
 	"sync"
 	"time"
@@ -21,7 +22,7 @@ type ParseResult struct {
 
 // ParseAll 并发请求一批 URLs，并返回每个 URL 的响应内容。
 // concurrency 用于控制并发线程数。
-func ParseAll(urls []string, concurrency int) ([]*ParseResult, error) {
+func ParseAll(urls []string, concurrency int, customHeaders []string, proxy string) ([]*ParseResult, error) {
 	if len(urls) == 0 {
 		return nil, fmt.Errorf("no URLs to parse")
 	}
@@ -50,7 +51,7 @@ func ParseAll(urls []string, concurrency int) ([]*ParseResult, error) {
             defer func() { <-sem }()
 
             // 执行 URL 处理
-            res, err := parseOneURL(url)
+            res, err := parseOneURL(url, customHeaders, proxy)
             if err != nil {
                 resultChan <- &ParseResult{
                     URL:   url,
@@ -76,12 +77,20 @@ func ParseAll(urls []string, concurrency int) ([]*ParseResult, error) {
 }
 
 // parseOneURL 对单个 URL 发起请求，获取响应内容。
-func parseOneURL(url string) (*ParseResult, error) {
+func parseOneURL(urlStr string, customHeaders []string, proxy string) (*ParseResult, error) {
 	// 自定义 Transport，忽略证书错误
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{
 			InsecureSkipVerify: true, // 忽略证书错误
 		},
+	}
+
+	// 如果 proxy != "" 就设置代理
+	if proxy != "" {
+		proxyURL, err := url.Parse(proxy)
+		if err == nil {
+			tr.Proxy = http.ProxyURL(proxyURL)
+		}
 	}
 
 	// 使用自定义 Transport
@@ -91,37 +100,46 @@ func parseOneURL(url string) (*ParseResult, error) {
 	}
 
 	// 手动创建请求，以便设置 UA 和其他伪装头
-	req, err := http.NewRequest("GET", url, nil)
+	req, err := http.NewRequest("GET", urlStr, nil)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create request for %s: %w", url, err)
+		return nil, fmt.Errorf("failed to create request for %s: %w", urlStr, err)
 	}
 
 	// 设置伪装头
 	req.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "+
 		"AppleWebKit/537.36 (KHTML, like Gecko) Chrome/95.0.4638.69 Safari/537.36")
 
+	// 自定义请求头
+	for _, h := range customHeaders {
+		parts := strings.SplitN(h, ":", 2)
+		if len(parts) == 2 {
+			key := strings.TrimSpace(parts[0])
+			val := strings.TrimSpace(parts[1])
+			req.Header.Set(key, val)
+		}
+	}
 
 	// 发起请求
 	resp, err := client.Do(req)
 	if err != nil {
-		return nil, fmt.Errorf("failed to GET %s: %w", url, err)
+		return nil, fmt.Errorf("failed to GET %s: %w", urlStr, err)
 	}
 	defer func() {
 		if cerr := resp.Body.Close(); cerr != nil {
-			log.Printf("[!] failed to close response body for %s: %v", url, cerr)
+			log.Printf("[!] failed to close response body for %s: %v", urlStr, cerr)
 		}
 	}()
 
 	// 读取响应体
 	bodyBytes, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return nil, fmt.Errorf("failed to read body from %s: %w", url, err)
+		return nil, fmt.Errorf("failed to read body from %s: %w", urlStr, err)
 	}
 
 	body := strings.TrimSpace(string(bodyBytes))
 
 	return &ParseResult{
-		URL:        url,
+		URL:        urlStr,
 		StatusCode: resp.StatusCode,
 		Body:       body,
 	}, nil

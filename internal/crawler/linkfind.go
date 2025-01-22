@@ -6,9 +6,9 @@ import (
 	"regexp"
 )
 
-func CollectLinksFromBody(urls []string, threads int, uniqueLinks map[string]struct{}, toParse *[]string) error {
+func CollectLinksFromBody(urls []string, threads int, uniqueLinks map[string]struct{}, toParse *[]string, customHeaders []string, proxy string) error {
     // 解析所有 URL 的内容
-    parsedResult, err := parser.ParseAll(urls, threads)
+    parsedResult, err := parser.ParseAll(urls, threads, customHeaders, proxy)
     if err != nil {
         //return fmt.Errorf("解析失败: %v", err)
     }
