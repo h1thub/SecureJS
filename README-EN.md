@@ -10,8 +10,6 @@ SecureJS is a powerful tool designed to collect all related links from a target 
   - [Usage](#usage)
     - [Example](#example)
   - [Configuration](#configuration)
-    - [Sample `config.yaml`](#sample-configyaml)
-    - [Loading Configuration](#loading-configuration)
   - [Project Structure](#project-structure)
 
 ## Features
@@ -31,33 +29,13 @@ SecureJS can be executed via the command line with various options to customize 
 ```bash
 ./SecureJS -u https://example.com -o results.csv
 ```
+
 ```bash
 ./SecureJS -l targets.txt -o results.csv -t 30
 ```
 ## Configuration
 
-SecureJS uses a `config.yaml` file to define custom matching rules and other project-level configurations.
-
-### Sample `config.yaml`
-
-```yaml
-rules:
-  - name: Sensitive Field
-    f_regex: (?i)\[?["']?[0-9A-Za-z_-]{0,15}(?:key|secret|token|config|auth|access|admin|ticket)[0-9A-Za-z_-]{0,15}["']?\]?\s*(?:=|:|\)\.val\()\s*\[?\{?["']([^"']{8,100})["']?(?::|,)?
-
-  - name: Password Field
-    f_regex: ((|\\)(|'|")(|[\w]{1,10})([p](ass|wd|asswd|assword))(|[\w]{1,10})(|\\)(|'|")(:|=|\)\.val\()(|)(|\\)('|")([^'"]+?)(|\\)('|")(|,|\)))
-
-  - name: JSON Web Token
-    f_regex: (eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9._-]{10,}|eyJ[A-Za-z0-9_\/+-]{10,}\.[A-Za-z0-9._\/+-]{10,})
-
-  - name: Cloud Key
-    f_regex: (?i)(?:AWSAccessKeyId=[A-Z0-9]{16,32}|access[-_]?key[-_]?(?:id|secret)|LTAI[a-z0-9]{12,20})
-```
-
-### Loading Configuration
-
-The configuration is automatically loaded from the `config/config.yaml` file. Ensure that your custom rules are correctly defined to match the sensitive information you aim to identify.
+SecureJS uses a `config/config.yaml` file to define custom matching rules and other project-level configurations.
 
 ## Project Structure
 
