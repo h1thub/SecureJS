@@ -1,12 +1,21 @@
 rules:
-  - name: Sensitive Field
-    f_regex: (?i)(\[?["']?[\w-]{0,10}(?:key|secret|token|config|auth|access|admin|ticket)[\w-]{0,10}["']?\]?)\s*(?:=|:|\)\.val\()\s*\[?\{?(?:'([^']{8,100})'|"([^"]{8,100})")(?:[:;,\}\]]?)?
+  - name: Extended Sensitive Field
+    f_regex: "(?i)([\"']?[\\w-]{0,15}(?:key|secret|token|config|auth|access|admin|ticket|api_key|client_secret|private_key|public_key|bearer|session|cookie|license|cert|ssh|salt|pepper)[\\w-]{0,15}[\"']?)\\s*(?:=|:|\\)\\.val\\()\\s*\\[?\\{?(?:'([^']{8,500})'|\"([^\\\"]{8,500})\")(?:[:;,\\}\\]]?)?"
 
-  - name: Password Field
-    f_regex: ((|\\)(|'|")(|[\w]{1,10})([p](ass|wd|asswd|assword))(|[\w]{1,10})(|\\)(|'|")(:|=|\)\.val\()(|)(|\\)('|")([^'"]+?)(|\\)('|")(|,|\)))
+  - name: Extended Password Field
+    f_regex: "(?i)((|\\\\)(?:'|\")[\\w-]{0,10}(?:p(?:ass|wd|asswd|assword|asscode|assphrase)|secret)[\\w-]{0,10}(|\\\\)(?:'|\"))\\s*(?:=|:|\\)\\.val\\()(|)(|\\\\)(?:'|\")([^'\"]+?)(|\\\\)(?:'|\")(?:|,|\\)|;)?"
 
-  - name: JSON Web Token
-    f_regex: (eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9._-]{10,}|eyJ[A-Za-z0-9_\/+-]{10,}\.[A-Za-z0-9._\/+-]{10,})
+  - name: Extended JSON Web Token
+    f_regex: "(?i)(eyJ[A-Za-z0-9_-]{5,}\\.[A-Za-z0-9._-]{5,}\\.[A-Za-z0-9._-]{5,})"
 
-  - name: Cloud Key
-    f_regex: (?i)(?:AWSAccessKeyId=[A-Z0-9]{16,32}|access[-_]?key[-_]?(?:id|secret)|LTAI[a-z0-9]{12,20})
+  - name: Extended Cloud Key
+    f_regex: "(?i)(AWSAccessKeyId=[A-Z0-9]{16,32}|access[-_]?key[-_]?(?:id|secret)|LTAI[a-z0-9]{12,20}|(?:AKIA|ABIA|ACCA|ASIA)[A-Z0-9]{16}|aws_secret_access_key\\s*=\\s*[\"'][^\"']{8,100}[\"'])"
+
+  - name: Azure Key
+    f_regex: "(?i)(AZURE_STORAGE[_-]?ACCOUNT[_-]?KEY|AZURE_STORAGE_KEY|AZURE_KEY_VAULT|azure_tenant_id)\\s*=\\s*[\"']([^\"']{8,100})[\"']"
+
+  - name: GCP Service Account
+    f_regex: "(?s)(\"type\"\\s*:\\s*\"service_account\".*?\"private_key_id\"\\s*:\\s*\"([a-z0-9]{10,})\".*?\"private_key\"\\s*:\\s*\"-----BEGIN PRIVATE KEY-----.*?-----END PRIVATE KEY-----\")"
+
+  - name: Private Key
+    f_regex: "(?s)-----BEGIN\\s+(?:RSA|EC|DSA|OPENSSH)?\\s*PRIVATE\\s+KEY-----.*?-----END\\s+(?:RSA|EC|DSA|OPENSSH)?\\s*PRIVATE\\s+KEY-----"

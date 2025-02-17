@@ -1,12 +1,11 @@
 # SecureJS
 
-SecureJS 是一个强大的工具，旨在从目标网站收集所有相关链接，对这些链接（主要是 JavaScript 文件）执行请求，并扫描敏感信息，如令牌、密钥、密码、AKSK 等。
+SecureJS 是一个强大的工具，旨在从目标网站收集所有相关链接，对这些链接（主要是 JavaScript 文件）执行请求，并扫描敏感信息，如令牌、密钥、密码、AKSK 等，后引入 DeepSeek 对结果进行分析。
 
 ## 目录
 
 - [SecureJS](#securejs)
   - [目录](#目录)
-  - [功能](#功能)
   - [使用方法](#使用方法)
     - [帮助信息](#帮助信息)
     - [示例](#示例)
@@ -14,17 +13,7 @@ SecureJS 是一个强大的工具，旨在从目标网站收集所有相关链�
   - [项目结构](#项目结构)
   - [免责声明](#免责声明)
 
-## 功能
-
-- **全面爬取**：模拟浏览器访问，收集目标网站的所有链接和 JavaScript 文件。
-- **二次请求**：对收集的资源执行额外的请求以进行更深入的分析。
-- **可自定义的匹配规则**：支持在 `config.yaml` 中定义的自定义规则，以识别敏感信息。
-- **灵活的输出格式**：将结果输出为 CSV、JSON 或纯文本格式。
-- **简易配置**：通过配置文件简化设置和自定义过程。
-
 ## 使用方法
-
-SecureJS 可以通过命令行执行，并提供各种选项以自定义其行为。
 
 ### 帮助信息
 
@@ -33,10 +22,13 @@ Usage:
   SecureJS [flags]
 
 Flags:
+  -a, --ai string            true/false. Enable AI Analytics. If not set, will use false (default "false")
   -b, --browser string       Path to Chrome/Chromium executable (optional). If not set, will use Rod's default.
   -c, --config string        Path to config file (e.g. config.yaml) (default "config/config.yaml")
   -H, --header stringArray   Add custom request headers. (e.g. -H 'Key: Value')
   -h, --help                 help for SecureJS
+  -i, --id string            YOUR_ENDPOINT_ID
+  -k, --key string           ARK_API_KEY
   -l, --list string          File containing target URLs (one per line)
   -o, --output string        Output file (supports .txt, .csv, .json)
   -p, --proxy string         Proxy to use (e.g. http://127.0.0.1:8080)
@@ -46,17 +38,10 @@ Flags:
 
 ### 示例
 
-```bash
-./SecureJS -u https://example.com -o results.csv
-```
-
-```bash
-./SecureJS -l targets.txt -o results.csv -t 30
-```
 
 ## 配置
 
-SecureJS 使用 `config/config.yaml` 文件来定义自定义匹配规则和其他项目级配置。
+SecureJS 使用 `config/config.yaml` 文件来定义自定义匹配规则和其他项目级配置。如不存在，首次运行后将自动生成该文件。另外，规则将进行尽可能的匹配，因为后续可进行AI分析，但这也会导致AI分析前误报结果高。
 
 ## 项目结构
 
@@ -66,6 +51,9 @@ SecureJS/
 │   └── root.go             # 处理命令行参数（-u、-l、-t 等）的入口点
 │
 ├── internal/
+│   ├── crawler/
+│   │   └── ai.go      # 引入 DeepSeek 对结果二次分析
+│   │
 │   ├── crawler/
 │   │   ├── crawler.go      # 爬虫逻辑，模拟浏览器访问，收集所有链接和 JS 文件
 │   │   └── linkfind.go     # 从目标页面的响应体中提取所有链接和 JS

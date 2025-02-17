@@ -115,17 +115,7 @@ func MatchAll(rules []config.Rule, parseResults []*parser.ParseResult) ([]*Match
 func filterMatchedItems(matchedItems []MatchItem) []MatchItem {
     // 1) 设定普通过滤关键词（子串匹配、忽略大小写）
     filterKeywords := []string{
-        "set", "email", "phone", "return", "get", "string", "xml", "input", "out", "next", "end", "length", "auth",
-        "add", "time", "delete", "data", "ticket", "key", "else", "has", "quest", "token", "access", "would", "requ",
-        "order", "code", "error", "start", "succuss", "fail", "signature", "index", "this", "like", "secret", "expir",
-        "static", "load", "queue", "able", "defin", "save", "need", "text", "how", "what", "signup","before", "after",
-        "login", "last", "move", "type", "clos", "begin", "point", "name", "find", "link", "bind", "cant", "empty",
-        "create", "default", "clear", "may", "all", "rend", "stat", "sound", "book", "hand", "true", "password",
-        "new", "old", "updat", "now", "should", "change", "exper", "yes", "config", "you", "not", "concat", "view",
-        "client", "from", "json", "script", "line", "late", "cate", "ance", "more", "nore", "valid", "dent", "source",
-		"select", "value", "color", "image", "style", "compon", ".com", "date", "file", "txt", "answer", "survey",
-		"false", "number", "_id", "connect", "body", "message", "session", "register", "work", "word", "world", "feedback",
-		"con", "success", "ream", "rity", "rest", "loca", "admin", "home", "tion", "enter", "button", "fetch", "list",
+        "xml",
     }
 
     // 2) 前置过滤关键词（只要 key 包含这些，就过滤）

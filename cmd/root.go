@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"SecureJS/config"
+	"SecureJS/internal/analyze"
 	"SecureJS/internal/crawler"
 	"SecureJS/internal/matcher"
 	"SecureJS/internal/output"
@@ -24,6 +25,9 @@ var (
 	browserPath string
 	customHeaders []string
 	proxy string
+	ai string
+	ARK_API_KEY string
+	Model_ENDPOINT_ID string
 )
 
 func init() {
@@ -35,6 +39,9 @@ func init() {
 	rootCmd.Flags().StringVarP(&browserPath, "browser", "b", "", "Path to Chrome/Chromium executable (optional). If not set, will use Rod's default.")
 	rootCmd.Flags().StringArrayVarP(&customHeaders, "header", "H", nil, "Add custom request headers. (e.g. -H 'Key: Value')")
 	rootCmd.Flags().StringVarP(&proxy, "proxy", "p", "", "Proxy to use (e.g. http://127.0.0.1:8080)")
+	rootCmd.Flags().StringVarP(&ai, "ai", "a", "false", "true/false. Enable AI Analytics. If not set, will use false")
+	rootCmd.Flags().StringVarP(&Model_ENDPOINT_ID, "id", "i", "", "YOUR_ENDPOINT_ID")
+	rootCmd.Flags().StringVarP(&ARK_API_KEY, "key", "k", "", "ARK_API_KEY")
 }
 
 var rootCmd = &cobra.Command{
@@ -98,10 +105,13 @@ var rootCmd = &cobra.Command{
 
 		// 6) 输出
 		if outputFile == "" {
-			// 未指定 -o，直接打印到控制台（这里包含“无信息”的提示）
-			output.PrintResultsToConsole(matchResults)
+			if ai == "true" {
+				resultString := analyze.FormatResultsToString(matchResults)
+				analyze.Analyze(resultString, ARK_API_KEY, Model_ENDPOINT_ID)
+			} else {
+				output.PrintResultsToConsole(matchResults)
+			}
 		} else {
-			// 指定文件，就写文件（只写有敏感信息的条目）
 			err := output.WriteResultsToFile(matchResults, outputFile)
 			if err != nil {
 				log.Fatalf("[!] Failed to write results to file: %v\n", err)
