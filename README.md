@@ -37,7 +37,7 @@ Flags:
 ```
 
 ### 示例
-<img width="520" alt="image" src="https://github.com/user-attachments/assets/3496f29a-8c46-4669-a63b-62abd0f198ce" />
+<img width="514" alt="image" src="https://github.com/user-attachments/assets/4e850e78-d6c5-4b55-b8c4-0f8822f98967" />
 
 
 ## 配置
