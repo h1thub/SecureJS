@@ -41,6 +41,7 @@ func crawlAll(urls []string, concurrency int, browserPath string, customHeaders 
 	launch := launcher.New().
 	Bin(chromePath).
 	Headless(true).
+	NoSandbox(true).
 	Set("ignore-certificate-errors").
 	Set("disable-blink-features", "AutomationControlled").
 	Set("disable-infobars")
