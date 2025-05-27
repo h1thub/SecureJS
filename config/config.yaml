@@ -3,8 +3,8 @@ rules:
     f_regex: "(?i)([\"']?[\\w-]{0,15}(?:key|secret|token|config|auth|access|admin|ticket|api_key|client_secret|private_key|public_key|bearer|session|cookie|license|cert|ssh|salt|pepper)[\\w-]{0,15}[\"']?)\\s*(?:=|:|\\)\\.val\\()\\s*\\[?\\{?(?:'([^']{8,500})'|\"([^\\\"]{8,500})\")(?:[:;,\\}\\]]?)?"
 
   - name: Extended Password Field
-    f_regex: "(?i)((|\\\\)(?:'|\")[\\w-]{0,10}(?:p(?:ass|wd|asswd|assword|asscode|assphrase)|secret)[\\w-]{0,10}(|\\\\)(?:'|\"))\\s*(?:=|:|\\)\\.val\\()(|)(|\\\\)(?:'|\")([^'\"]+?)(|\\\\)(?:'|\")(?:|,|\\)|;)?"
-
+    f_regex: "(?i)([\"']?[\\w-]{0,10}(p(?:ass|wd|asswd|assword))[\\w-]{0,10}[\"']?)\\s*[:=]\\s*[\"']([^'\"\\\\]+)[\"']"
+     
   - name: Extended JSON Web Token
     f_regex: "(?i)(eyJ[A-Za-z0-9_-]{5,}\\.[A-Za-z0-9._-]{5,}\\.[A-Za-z0-9._-]{5,})"
 
